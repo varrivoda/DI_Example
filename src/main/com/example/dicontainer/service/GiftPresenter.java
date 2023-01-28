@@ -1,34 +1,74 @@
 //
-// 1. Here we initialize service dependencies right here - in service class
+// 2. Now we have 
 //
-// There are two good things about this kind of initialization:
-// 	- it's simple, 
-// 	- and from point of incapsulation it's okay, 
-//because client class doesn't know anything about service's dependencies
-//... 
-// Here the good things are done, and starts the badthings:
-// 	- for exapple, what will be if we won't pay by card and want to pay cash?
-//In this case we have to change the code of service! And also - 
-//we have to remove CardPaymentSystem
-// This design also violates the SRP, because this service class 
-// is also responsible for implementation of ChooseHelper, PS, DS;
-// Everytime we're going to do a new implementation - we need to change GiftPresenter
-// This code will be very difficult to support..
 //
+//
+// The code looks beautiful
+// The dependencies are injected through constructor, and this is very cool
+// Thus, we declare a contract to a client's code, and inform to it:
+//	You're going to create GiftPresenter, so please first transmit the resources,
+// 	give a ChooseHelper, a PaymentSystem and a DeliverySystem.
+//	So the ..calling.. code knows what he must to give to GiftPresenter for good working.
+//	
+// And from the Testing point it is okay also, because we can easily transmit mock-objects 
+//instead of the instancesof the real classes
+//
+// But! it is still not suitable for ..enterprise.. programming
+// becausefor all these posivitive moments have to pay client's code
+//
+//lets take a look at NewYearOrganizer
+// Now it have to instantiate all the dependencies of GiftPresenter
+// Thus, now we improved quantity of dependencies
+// Before we had only GiftPresenter, which dependends on three interfaces.
+// Now we have NewYearOrganizer dependent from those classes, 
+// and more- it depends on instantiation of these interfaces
+//
+//it is possible to work with the lack of classes and dependencies, 
+//in this case we can manage implementations manually
+
+// But if we work on a big project, 
+// or - at least if we have three-level dependencies
+//
+// for example if SmartChooseHelper depends on interface Recomendator
+// and it's implementation SmartRecommendator
+//		this dependency willbe injected through the constructor as well,
+// 		see SmartChooseHelper class
+//		......
+//
+
+
+
+
+
 
 package com.example.dicontainer.service;
 
 import com.example.dicontainer.model.Gift;
 import com.example.dicontainer.model.Person;
-import com.example.dicontainer.service.impl.SmartGiftChooseHelper;
-import com.example.dicontainer.service.impl.CardPaymentSystem;
-import com.example.dicontainer.service.impl.PostDeliverySystem;
+
+//recommendator
+import com.example.dicontainer.service.impl.Recommendator;
+// !check!
+// do we need for implementation here?
+//import com.example.dicontainer.service.impl.SmartRecommendator;
+
 
 public class GiftPresenter{
 	
-	private GiftChooseHelper giftChooseHelper = new SmartGiftChooseHelper();
-	private PaymentSystem paymentSystem = new CardPaymentSystem();
-	private DeliverySystem delivirySystem = new PostDeliverySystem();
+	private GiftChooseHelper giftChooseHelper;
+	private PaymentSystem paymentSystem;
+	private DeliverySystem delivirySystem;
+	
+	public GiftPresenter(GiftChooseHelper giftChooseHelper, 
+						PaymentSystem paymentSystem, 
+						DeliverySystem delivirySystem,
+						Recommendator recommendator)
+	{
+		this.giftChooseHelper = giftChooseHelper;
+		this.paymentSystem = paymentSystem;
+		this.delivirySystem = delivirySystem;
+	}
+	
 	
 	public void presentGift(Person person){
 		Gift gift = giftChooseHelper.choose(person);
